@@ -3,6 +3,7 @@ using NigerianPrimarySchool.Application.Interfaces;
 
 namespace NigerianPrimarySchool.Web.Identity;
 
+//Implementation of ICurrentUserService that retrieves user information from the current HTTP context's User claims principal.
 public class CurrentUserService : ICurrentUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
