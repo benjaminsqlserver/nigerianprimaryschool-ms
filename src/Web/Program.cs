@@ -1,3 +1,4 @@
+//this comment was added to check in code for Lesson 1
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using NigerianPrimarySchool.Application.Interfaces;
