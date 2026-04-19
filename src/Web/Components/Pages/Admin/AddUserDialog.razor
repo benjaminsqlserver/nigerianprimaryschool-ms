@@ -1,0 +1,92 @@
+@using NigerianPrimarySchool.Application.DTOs.Auth
+@inject IIdentityService    IdentityService
+@inject DialogService       DialogService
+@inject NotificationService NotificationService
+
+<EditForm Model="dto" OnValidSubmit="Submit" FormName="add-user">
+    <DataAnnotationsValidator />
+    <RadzenRow Gap="1rem">
+        <RadzenColumn SizeMD="6">
+            <RadzenFormField Text="First Name">
+                <InputText @bind-Value="dto.FirstName" class="rz-textbox" />
+                <ValidationMessage For="() => dto.FirstName" />
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="6">
+            <RadzenFormField Text="Last Name">
+                <InputText @bind-Value="dto.LastName" class="rz-textbox" />
+                <ValidationMessage For="() => dto.LastName" />
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="6">
+            <RadzenFormField Text="Middle Name (optional)">
+                <InputText @bind-Value="dto.MiddleName" class="rz-textbox" />
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="6">
+            <RadzenFormField Text="Phone Number">
+                <InputText @bind-Value="dto.PhoneNumber" class="rz-textbox"
+                           placeholder="+2348012345678" />
+                <ValidationMessage For="() => dto.PhoneNumber" />
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="12">
+            <RadzenFormField Text="Email Address">
+                <InputText @bind-Value="dto.Email" class="rz-textbox"
+                           placeholder="user@school.edu.ng" />
+                <ValidationMessage For="() => dto.Email" />
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="12">
+            <RadzenFormField Text="Role">
+                <RadzenDropDown @bind-Value="dto.Role" Data="Roles.All" class="rz-textbox"
+                                Placeholder="Select a role…" />
+                <ValidationMessage For="() => dto.Role" />
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="6">
+            <RadzenFormField Text="Password">
+                <InputText type="password" @bind-Value="dto.Password" class="rz-textbox" />
+                <ValidationMessage For="() => dto.Password" />
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="6">
+            <RadzenFormField Text="Confirm Password">
+                <InputText type="password" @bind-Value="dto.ConfirmPassword" class="rz-textbox" />
+                <ValidationMessage For="() => dto.ConfirmPassword" />
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" style="margin-top:.75rem">@error</RadzenAlert>
+    }
+
+    <div class="nps-dialog-actions">
+        <RadzenButton Text="Cancel" ButtonStyle="ButtonStyle.Light"
+                      Click="@(() => DialogService.Close(false))" />
+        <RadzenButton ButtonType="ButtonType.Submit" Text="Create User"
+                      Icon="person_add" ButtonStyle="ButtonStyle.Primary"
+                      IsBusy="@busy" BusyText="Creating…" />
+    </div>
+</EditForm>
+
+@code {
+    private RegisterUserDto dto   = new();
+    private string?         error;
+    private bool            busy;
+
+    private async Task Submit()
+    {
+        busy = true; error = null;
+        var result = await IdentityService.CreateUserAsync(dto);
+        if (result.Succeeded)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, "User Created",
+                $"{dto.FirstName} {dto.LastName} ({dto.Role}) added successfully.");
+            DialogService.Close(true);
+        }
+        else { error = result.FirstError; busy = false; }
+    }
+}

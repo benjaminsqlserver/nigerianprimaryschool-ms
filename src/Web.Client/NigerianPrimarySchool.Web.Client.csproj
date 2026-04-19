@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>NigerianPrimarySchool.Web.Client</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\NigerianPrimarySchool.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      WebAssembly SDK does NOT automatically include Authorization types.
+      Microsoft.AspNetCore.Components.Authorization provides:
+        - AuthenticationState
+        - AuthenticationStateProvider
+        - Microsoft.AspNetCore.Components.Authorization namespace
+        - <AuthorizeView>, [Authorize], CascadingAuthenticationState, etc.
+    -->
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly"        Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization"      Version="9.0.0" />
+    <PackageReference Include="Radzen.Blazor"                                      Version="5.*"   />
+  </ItemGroup>
+</Project>

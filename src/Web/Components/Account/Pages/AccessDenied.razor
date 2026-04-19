@@ -1,0 +1,11 @@
+@page "/Account/AccessDenied"
+@inject NavigationManager Navigation
+
+<PageTitle>Access Denied</PageTitle>
+<div class="nps-denied">
+    <RadzenIcon Icon="lock" style="font-size:4rem;color:var(--rz-danger)" />
+    <h1>Access Denied</h1>
+    <p>You do not have permission to view this page.</p>
+    <RadzenButton Text="Go to Dashboard" Icon="home" ButtonStyle="ButtonStyle.Primary"
+                  Click="@(() => Navigation.NavigateTo("/"))" />
+</div>

@@ -1,0 +1,134 @@
+/* ═══════════════════════════════════════════════════
+   Nigerian Primary School — Global Stylesheet
+   Palette: deep green + gold + white
+   ═══════════════════════════════════════════════════ */
+:root {
+    --nps-green:       #1a6b3c;
+    --nps-green-dark:  #0f4226;
+    --nps-green-light: #e8f5ee;
+    --nps-gold:        #c89b2a;
+    --nps-gold-light:  #fdf6e3;
+    --nps-text:        #212529;
+    --nps-muted:       #6c757d;
+    --nps-border:      #dee2e6;
+    --nps-radius:      8px;
+    --nps-shadow:      0 2px 8px rgba(0,0,0,.10);
+
+    /* Override Radzen primary colour */
+    --rz-primary:         var(--nps-green);
+    --rz-primary-dark:    var(--nps-green-dark);
+    --rz-primary-lighter: var(--nps-green-light);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       color: var(--nps-text); margin: 0; }
+a    { color: var(--nps-green); }
+
+/* ── Header ──────────────────────────────────────── */
+.nps-header {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 0 1rem; height: 100%;
+}
+.nps-school-title {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: 1.1rem; font-weight: 700; color: var(--nps-green);
+}
+.nps-logo          { height: 36px; }
+.nps-header-actions{ margin-left: auto; display: flex; align-items: center; gap: .75rem; }
+.nps-welcome       { font-size: .9rem; color: var(--nps-muted); }
+
+/* ── Sidebar ─────────────────────────────────────── */
+.nps-sidebar { background: var(--nps-green-dark) !important; }
+.nps-sidebar .rz-navigation-item-text,
+.nps-sidebar .rz-panel-menu-item-text { color: #fff !important; }
+.nps-sidebar .rz-navigation-item:hover { background: rgba(255,255,255,.12) !important; }
+.nps-sidebar .rz-navigation-item.rz-state-active,
+.nps-sidebar .rz-panel-menu-item.rz-state-active { background: var(--nps-gold) !important; }
+
+/* ── Main content ────────────────────────────────── */
+.nps-content { padding: 1.5rem; }
+
+/* ── Footer ──────────────────────────────────────── */
+.nps-footer {
+    text-align: center; font-size: .8rem;
+    color: var(--nps-muted); padding: .5rem;
+}
+
+/* ── Auth wrapper (login / reset etc.) ───────────── */
+.nps-empty-layout {
+    background: linear-gradient(135deg, var(--nps-green-dark), var(--nps-green));
+    min-height: 100vh; display: flex;
+    align-items: center; justify-content: center;
+}
+.nps-auth-wrapper {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 2rem;
+}
+.nps-auth-card {
+    background: #fff; border-radius: var(--nps-radius);
+    padding: 2.5rem; width: 100%; max-width: 440px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.22);
+}
+.nps-auth-logo       { text-align: center; margin-bottom: 1rem; }
+.nps-auth-logo img   { height: 72px; }
+.nps-auth-title      { text-align: center; font-size: 1.4rem; font-weight: 700;
+                        margin: 0 0 .25rem; color: var(--nps-green); }
+.nps-auth-sub        { text-align: center; color: var(--nps-muted); margin: 0 0 1.5rem; }
+.nps-field           { width: 100%; margin-bottom: 1rem; display: block; }
+.nps-remember-row    { display: flex; align-items: center; gap: .5rem; margin-bottom: 1rem; }
+.nps-forgot          { margin-left: auto; font-size: .85rem; }
+.nps-btn-full        { width: 100%; }
+.nps-link            { color: var(--nps-green); text-decoration: none; }
+.nps-link:hover      { text-decoration: underline; }
+.nps-status-msg      { margin-bottom: 1rem; }
+
+/* ── Page titles ─────────────────────────────────── */
+.nps-page-title {
+    margin-bottom: 1.25rem !important;
+    color: var(--nps-green);
+    display: flex; align-items: center; gap: .5rem;
+}
+
+/* ── Stat cards ──────────────────────────────────── */
+.nps-stat-card {
+    text-align: center; padding: 1.5rem !important;
+    border-top: 4px solid transparent;
+    transition: transform .15s;
+}
+.nps-stat-card:hover     { transform: translateY(-2px); box-shadow: var(--nps-shadow); }
+.nps-stat-card .rzi      { font-size: 2.5rem !important; margin-bottom: .5rem; }
+.nps-stat-primary        { border-color: var(--nps-green); }
+.nps-stat-success        { border-color: #28a745; }
+.nps-stat-info           { border-color: #17a2b8; }
+.nps-stat-warning        { border-color: var(--nps-gold); }
+
+/* ── Data grid ───────────────────────────────────── */
+.nps-grid { border-radius: var(--nps-radius); overflow: hidden; }
+
+/* ── Dialog actions ──────────────────────────────── */
+.nps-dialog-actions {
+    display: flex; justify-content: flex-end; gap: .75rem; margin-top: 1.25rem;
+}
+.nps-mt { margin-top: 1rem; }
+
+/* ── Profile card ────────────────────────────────── */
+.nps-profile-card { text-align: center; }
+.nps-avatar       { margin-bottom: .5rem; }
+
+/* ── Access denied ───────────────────────────────── */
+.nps-denied {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 1rem; padding: 4rem 2rem; text-align: center;
+}
+.nps-denied h1   { color: var(--nps-green); }
+.nps-error-msg   { color: #dc3545; padding: 2rem; }
+
+/* ── Blazor error overlay ────────────────────────── */
+#blazor-error-ui {
+    background: #fff3cd; border: 1px solid var(--nps-gold);
+    padding: .75rem 1rem; position: fixed; bottom: 0;
+    width: 100%; z-index: 9999; display: none;
+}
+#blazor-error-ui .dismiss { float: right; cursor: pointer; }

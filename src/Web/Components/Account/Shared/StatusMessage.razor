@@ -1,0 +1,6 @@
+@if (!string.IsNullOrWhiteSpace(Message))
+{
+    <RadzenAlert AlertStyle="AlertStyle.Danger" ShowIcon="true"
+                 AllowClose="false" class="nps-status-msg">@Message</RadzenAlert>
+}
+@code { [Parameter] public string? Message { get; set; } }

@@ -1,0 +1,8 @@
+@inject NavigationManager Navigation
+<div class="nps-denied">
+    <RadzenIcon Icon="lock" style="font-size:4rem;color:var(--rz-danger)" />
+    <RadzenText TextStyle="TextStyle.H4">Access Denied</RadzenText>
+    <RadzenText>You do not have permission to view this page.</RadzenText>
+    <RadzenButton Text="Dashboard" Icon="home" ButtonStyle="ButtonStyle.Primary"
+                  Click="@(() => Navigation.NavigateTo("/"))" />
+</div>

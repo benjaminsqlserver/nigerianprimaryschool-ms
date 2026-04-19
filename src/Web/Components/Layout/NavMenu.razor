@@ -1,0 +1,87 @@
+<RadzenPanelMenu>
+
+    <RadzenPanelMenuItem Text="Dashboard" Icon="dashboard" Path="/" />
+
+    <AuthorizeView Policy="@Policies.RequireSuperAdmin">
+        <RadzenPanelMenuItem Text="Administration" Icon="admin_panel_settings">
+            <RadzenPanelMenuItem Text="User Management"     Icon="group"    Path="/admin/users" />
+            <RadzenPanelMenuItem Text="Roles & Permissions" Icon="security" Path="/admin/roles" />
+            <RadzenPanelMenuItem Text="System Settings"     Icon="settings" Path="/admin/settings" />
+        </RadzenPanelMenuItem>
+    </AuthorizeView>
+
+    <AuthorizeView Policy="@Policies.RequireHeadTeacherOrAbove">
+        <RadzenPanelMenuItem Text="Academic" Icon="school">
+            <RadzenPanelMenuItem Text="Classes & Arms" Icon="class"      Path="/academic/classes" />
+            <RadzenPanelMenuItem Text="Subjects"       Icon="menu_book"  Path="/academic/subjects" />
+            <RadzenPanelMenuItem Text="Timetable"      Icon="schedule"   Path="/academic/timetable" />
+            <RadzenPanelMenuItem Text="Examinations"   Icon="quiz"       Path="/academic/exams" />
+            <RadzenPanelMenuItem Text="Results"        Icon="grade"      Path="/academic/results" />
+        </RadzenPanelMenuItem>
+    </AuthorizeView>
+
+    <AuthorizeView Policy="@Policies.RequireTeacher">
+        <RadzenPanelMenuItem Text="My Classes" Icon="co_present">
+            <RadzenPanelMenuItem Text="Attendance"  Icon="fact_check" Path="/teacher/attendance" />
+            <RadzenPanelMenuItem Text="Score Entry" Icon="edit_note"  Path="/teacher/scores" />
+            <RadzenPanelMenuItem Text="Remarks"     Icon="comment"    Path="/teacher/remarks" />
+        </RadzenPanelMenuItem>
+    </AuthorizeView>
+
+    <AuthorizeView Policy="@Policies.RequireAnyStaff">
+        <RadzenPanelMenuItem Text="Students" Icon="person">
+            <RadzenPanelMenuItem Text="Enrolment"    Icon="person_add"  Path="/students/enrolment" />
+            <RadzenPanelMenuItem Text="Student List" Icon="list"        Path="/students/list" />
+            <RadzenPanelMenuItem Text="Promotions"   Icon="trending_up" Path="/students/promotions" />
+        </RadzenPanelMenuItem>
+    </AuthorizeView>
+
+    <AuthorizeView Policy="@Policies.RequireFinance">
+        <RadzenPanelMenuItem Text="Finance" Icon="account_balance">
+            <RadzenPanelMenuItem Text="Fee Configuration" Icon="tune"       Path="/finance/fees" />
+            <RadzenPanelMenuItem Text="Fee Payments"      Icon="payments"   Path="/finance/payments" />
+            <RadzenPanelMenuItem Text="Debtors List"      Icon="warning"    Path="/finance/debtors" />
+            <RadzenPanelMenuItem Text="Financial Reports" Icon="bar_chart"  Path="/finance/reports" />
+        </RadzenPanelMenuItem>
+    </AuthorizeView>
+
+    <AuthorizeView Policy="@Policies.RequireStore">
+        <RadzenPanelMenuItem Text="Bookshop" Icon="local_library">
+            <RadzenPanelMenuItem Text="Book Stock" Icon="inventory_2"  Path="/bookshop/stock" />
+            <RadzenPanelMenuItem Text="Book Sales" Icon="point_of_sale" Path="/bookshop/sales" />
+        </RadzenPanelMenuItem>
+        <RadzenPanelMenuItem Text="Store" Icon="warehouse">
+            <RadzenPanelMenuItem Text="Inventory"    Icon="inventory"  Path="/store/inventory" />
+            <RadzenPanelMenuItem Text="Requisitions" Icon="assignment" Path="/store/requisitions" />
+        </RadzenPanelMenuItem>
+    </AuthorizeView>
+
+    <AuthorizeView Policy="@Policies.RequireParent">
+        <RadzenPanelMenuItem Text="My Children" Icon="family_restroom">
+            <RadzenPanelMenuItem Text="Results"    Icon="grade"    Path="/parent/results" />
+            <RadzenPanelMenuItem Text="Attendance" Icon="event"    Path="/parent/attendance" />
+            <RadzenPanelMenuItem Text="Fee Status" Icon="receipt"  Path="/parent/fees" />
+            <RadzenPanelMenuItem Text="Circulars"  Icon="campaign" Path="/parent/circulars" />
+        </RadzenPanelMenuItem>
+    </AuthorizeView>
+
+    <AuthorizeView Policy="@Policies.RequireStudent">
+        <RadzenPanelMenuItem Text="My Portal" Icon="person_pin">
+            <RadzenPanelMenuItem Text="My Results"   Icon="grade"    Path="/student/results" />
+            <RadzenPanelMenuItem Text="My Timetable" Icon="schedule" Path="/student/timetable" />
+            <RadzenPanelMenuItem Text="Circulars"    Icon="campaign" Path="/student/circulars" />
+        </RadzenPanelMenuItem>
+    </AuthorizeView>
+
+    <RadzenPanelMenuItem Text="My Profile" Icon="manage_accounts" Path="/Account/Manage" />
+    <form action="/Account/Logout" method="post" style="padding: 0.5rem 1rem;">
+        <input type="hidden" name="returnUrl" value="Account/Login" />
+        <button type="submit" style="background:none;border:none;cursor:pointer;
+            color:inherit;display:flex;align-items:center;gap:0.5rem;
+            font-size:0.9rem;width:100%;padding:0.4rem 0;">
+            <span class="rzi">logout</span> Logout
+        </button>
+    </form>
+
+
+</RadzenPanelMenu>

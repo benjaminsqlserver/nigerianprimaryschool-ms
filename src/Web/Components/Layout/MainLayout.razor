@@ -1,0 +1,47 @@
+@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+
+<RadzenLayout>
+    <RadzenHeader>
+        <div class="nps-header">
+            <RadzenSidebarToggle Click="@ToggleSidebar" />
+            <div class="nps-school-title">
+                <img src="/images/school-logo.png" alt="School" class="nps-logo"
+                     onerror="this.style.display='none'" />
+                <span>Nigerian Primary School</span>
+            </div>
+            <div class="nps-header-actions">
+                <AuthorizeView>
+                    <Authorized>
+                        <span class="nps-welcome">@context.User.Identity?.Name</span>
+                        <form action="/Account/Logout" method="post">
+                            <input type="hidden" name="returnUrl" value="Account/Login" />
+                            <RadzenButton Text="Logout" Icon="logout"
+                                          ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
+                                          ButtonType="ButtonType.Submit" />
+                        </form>
+
+                    </Authorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </RadzenHeader>
+
+    <RadzenSidebar @ref="sidebar" class="nps-sidebar">
+        <NavMenu />
+    </RadzenSidebar>
+
+    <RadzenBody>
+        <div class="nps-content">@Body</div>
+    </RadzenBody>
+
+    <RadzenFooter>
+        <div class="nps-footer">&copy; @DateTime.Now.Year Nigerian Primary School Management System</div>
+    </RadzenFooter>
+</RadzenLayout>
+<RadzenComponents />
+
+@code {
+    RadzenSidebar? sidebar;
+    void ToggleSidebar() => sidebar?.Toggle();
+}

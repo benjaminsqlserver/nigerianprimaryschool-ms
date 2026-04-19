@@ -1,0 +1,87 @@
+@page "/"
+@attribute [Authorize]
+@inject ICurrentUserService CurrentUser
+
+<PageTitle>Dashboard — Nigerian Primary School</PageTitle>
+
+<RadzenText TextStyle="TextStyle.H4" class="nps-page-title">Dashboard</RadzenText>
+<RadzenText>
+    Welcome back, <strong>@CurrentUser.FullName</strong>! &nbsp;
+    <RadzenBadge Text="@(CurrentUser.Roles.FirstOrDefault() ?? "User")"
+                 BadgeStyle="BadgeStyle.Primary" />
+</RadzenText>
+
+<RadzenRow Gap="1rem" style="margin-top:1.5rem">
+
+    <AuthorizeView Policy="@Policies.RequireHeadTeacherOrAbove">
+        <RadzenColumn SizeMD="3">
+            <RadzenCard class="nps-stat-card nps-stat-primary">
+                <RadzenIcon Icon="group" />
+                <RadzenText TextStyle="TextStyle.H6">Total Students</RadzenText>
+                <RadzenText TextStyle="TextStyle.H3">—</RadzenText>
+            </RadzenCard>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="3">
+            <RadzenCard class="nps-stat-card nps-stat-success">
+                <RadzenIcon Icon="person" />
+                <RadzenText TextStyle="TextStyle.H6">Total Staff</RadzenText>
+                <RadzenText TextStyle="TextStyle.H3">—</RadzenText>
+            </RadzenCard>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="3">
+            <RadzenCard class="nps-stat-card nps-stat-info">
+                <RadzenIcon Icon="class" />
+                <RadzenText TextStyle="TextStyle.H6">Active Classes</RadzenText>
+                <RadzenText TextStyle="TextStyle.H3">—</RadzenText>
+            </RadzenCard>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="3">
+            <RadzenCard class="nps-stat-card nps-stat-warning">
+                <RadzenIcon Icon="payments" />
+                <RadzenText TextStyle="TextStyle.H6">Fees Collected</RadzenText>
+                <RadzenText TextStyle="TextStyle.H3">₦ —</RadzenText>
+            </RadzenCard>
+        </RadzenColumn>
+    </AuthorizeView>
+
+    <AuthorizeView Policy="@Policies.RequireTeacher">
+        <RadzenColumn SizeMD="4">
+            <RadzenCard class="nps-stat-card nps-stat-primary">
+                <RadzenIcon Icon="co_present" />
+                <RadzenText TextStyle="TextStyle.H6">My Classes</RadzenText>
+                <RadzenText>Use the menu to take attendance and enter scores.</RadzenText>
+            </RadzenCard>
+        </RadzenColumn>
+    </AuthorizeView>
+
+    <AuthorizeView Policy="@Policies.RequireFinance">
+        <RadzenColumn SizeMD="4">
+            <RadzenCard class="nps-stat-card nps-stat-warning">
+                <RadzenIcon Icon="account_balance" />
+                <RadzenText TextStyle="TextStyle.H6">Finance Summary</RadzenText>
+                <RadzenText>Access fee payments and reports from the Finance menu.</RadzenText>
+            </RadzenCard>
+        </RadzenColumn>
+    </AuthorizeView>
+
+    <AuthorizeView Policy="@Policies.RequireParent">
+        <RadzenColumn SizeMD="4">
+            <RadzenCard class="nps-stat-card nps-stat-info">
+                <RadzenIcon Icon="family_restroom" />
+                <RadzenText TextStyle="TextStyle.H6">My Children</RadzenText>
+                <RadzenText>View results, attendance and fee status from the menu.</RadzenText>
+            </RadzenCard>
+        </RadzenColumn>
+    </AuthorizeView>
+
+    <AuthorizeView Policy="@Policies.RequireStudent">
+        <RadzenColumn SizeMD="4">
+            <RadzenCard class="nps-stat-card nps-stat-info">
+                <RadzenIcon Icon="school" />
+                <RadzenText TextStyle="TextStyle.H6">My Academics</RadzenText>
+                <RadzenText>View your results and timetable from the My Portal menu.</RadzenText>
+            </RadzenCard>
+        </RadzenColumn>
+    </AuthorizeView>
+
+</RadzenRow>

@@ -1,0 +1,186 @@
+@page "/Account/Manage"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Identity
+@using NigerianPrimarySchool.Application.DTOs.Auth
+@using NigerianPrimarySchool.Application.Interfaces
+@using NigerianPrimarySchool.Infrastructure.Identity
+@inject UserManager<ApplicationUser>  UserManager
+@inject IIdentityService              IdentityService
+@inject ICurrentUserService           CurrentUser
+@inject NotificationService           NotificationService
+
+<PageTitle>My Profile — NPS</PageTitle>
+
+<RadzenText TextStyle="TextStyle.H4" class="nps-page-title">
+    <RadzenIcon Icon="manage_accounts" /> My Profile
+</RadzenText>
+
+@if (profile is null)
+{
+    <RadzenProgressBarCircular Visible="true" />
+}
+else
+{
+    <RadzenRow Gap="1.5rem">
+
+        <!-- ── Profile summary card ── -->
+        <RadzenColumn SizeMD="4">
+            <RadzenCard class="nps-profile-card">
+                <div class="nps-avatar">
+                    <RadzenIcon Icon="account_circle"
+                                Style="font-size:5rem;color:var(--rz-primary)" />
+                </div>
+                <RadzenText TextStyle="TextStyle.H6">@profile.FullName</RadzenText>
+                <RadzenBadge Text="@profile.PrimaryRole" BadgeStyle="BadgeStyle.Info" />
+                <br /><RadzenText>@profile.Email</RadzenText>
+                <RadzenText>@(profile.PhoneNumber ?? "—")</RadzenText>
+                <RadzenText Style="font-size:.75rem;color:var(--rz-text-disabled-color)">
+                    Member since @profile.CreatedAt.ToString("MMM yyyy")
+                </RadzenText>
+            </RadzenCard>
+        </RadzenColumn>
+
+        <!-- ── Edit profile form ── -->
+        <RadzenColumn SizeMD="8">
+            <RadzenCard>
+                <RadzenText TextStyle="TextStyle.H6">Edit Profile</RadzenText>
+                <EditForm Model="updateDto" OnValidSubmit="SaveProfile" FormName="profile-edit">
+                    <DataAnnotationsValidator />
+                    <RadzenRow Gap="1rem">
+                        <RadzenColumn SizeMD="4">
+                            <RadzenFormField Text="First Name">
+                                <InputText @bind-Value="updateDto.FirstName" class="rz-textbox" />
+                                <ValidationMessage For="() => updateDto.FirstName" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="4">
+                            <RadzenFormField Text="Middle Name">
+                                <InputText @bind-Value="updateDto.MiddleName" class="rz-textbox" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="4">
+                            <RadzenFormField Text="Last Name">
+                                <InputText @bind-Value="updateDto.LastName" class="rz-textbox" />
+                                <ValidationMessage For="() => updateDto.LastName" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenFormField Text="Phone Number">
+                                <InputText @bind-Value="updateDto.PhoneNumber" class="rz-textbox" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenFormField Text="Gender">
+                                <RadzenDropDown @bind-Value="updateDto.Gender"
+                                                Data="@(new[]{"Male","Female","Other"})"
+                                                class="rz-textbox" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenFormField Text="Date of Birth">
+                                <RadzenDatePicker @bind-Value="updateDto.DateOfBirth"
+                                                  DateFormat="dd/MM/yyyy" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="12">
+                            <RadzenFormField Text="Address">
+                                <InputTextArea @bind-Value="updateDto.Address"
+                                               class="rz-textbox" rows="2" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenButton ButtonType="ButtonType.Submit" Text="Save Changes"
+                                  Icon="save" ButtonStyle="ButtonStyle.Primary"
+                                  IsBusy="@saving" BusyText="Saving…" />
+                </EditForm>
+            </RadzenCard>
+
+            <!-- ── Change password ── -->
+            <RadzenCard style="margin-top:1rem">
+                <RadzenText TextStyle="TextStyle.H6">Change Password</RadzenText>
+                <EditForm Model="pwdDto" OnValidSubmit="ChangePassword" FormName="pwd-change">
+                    <DataAnnotationsValidator />
+                    <RadzenRow Gap="1rem">
+                        <RadzenColumn SizeMD="12">
+                            <RadzenFormField Text="Current Password">
+                                <InputText type="password" @bind-Value="pwdDto.CurrentPassword"
+                                           class="rz-textbox" />
+                                <ValidationMessage For="() => pwdDto.CurrentPassword" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenFormField Text="New Password">
+                                <InputText type="password" @bind-Value="pwdDto.NewPassword"
+                                           class="rz-textbox" />
+                                <ValidationMessage For="() => pwdDto.NewPassword" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenFormField Text="Confirm New Password">
+                                <InputText type="password" @bind-Value="pwdDto.ConfirmNewPassword"
+                                           class="rz-textbox" />
+                                <ValidationMessage For="() => pwdDto.ConfirmNewPassword" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenButton ButtonType="ButtonType.Submit" Text="Update Password"
+                                  Icon="lock_reset" ButtonStyle="ButtonStyle.Warning"
+                                  IsBusy="@changingPwd" BusyText="Updating…" />
+                </EditForm>
+            </RadzenCard>
+        </RadzenColumn>
+    </RadzenRow>
+}
+
+@code {
+    private UserProfileDto?   profile;
+    private UpdateProfileDto  updateDto  = new();
+    private ChangePasswordDto pwdDto     = new();
+    private bool              saving, changingPwd;
+
+    protected override async Task OnInitializedAsync()
+    {
+        profile = await IdentityService.GetUserByIdAsync(CurrentUser.UserId ?? "");
+        if (profile is null) return;
+        updateDto = new UpdateProfileDto
+        {
+            FirstName   = profile.FirstName,
+            MiddleName  = profile.MiddleName,
+            LastName    = profile.LastName,
+            PhoneNumber = profile.PhoneNumber,
+            Gender      = profile.Gender,
+            DateOfBirth = profile.DateOfBirth,
+            Address     = profile.Address,
+        };
+    }
+
+    private async Task SaveProfile()
+    {
+        saving = true;
+        var result = await IdentityService.UpdateProfileAsync(CurrentUser.UserId!, updateDto);
+        if (result.Succeeded)
+        {
+            NotificationService.Notify(NotificationSeverity.Success,
+                "Saved", "Your profile has been updated.");
+            profile = await IdentityService.GetUserByIdAsync(CurrentUser.UserId!);
+        }
+        else
+            NotificationService.Notify(NotificationSeverity.Error, "Error", result.FirstError);
+        saving = false;
+    }
+
+    private async Task ChangePassword()
+    {
+        changingPwd = true;
+        var result = await IdentityService.ChangePasswordAsync(CurrentUser.UserId!, pwdDto);
+        if (result.Succeeded)
+        {
+            NotificationService.Notify(NotificationSeverity.Success,
+                "Done", "Password updated successfully.");
+            pwdDto = new();
+        }
+        else
+            NotificationService.Notify(NotificationSeverity.Error, "Error", result.FirstError);
+        changingPwd = false;
+    }
+}

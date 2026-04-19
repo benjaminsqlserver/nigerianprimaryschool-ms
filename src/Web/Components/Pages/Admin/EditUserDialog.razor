@@ -1,0 +1,123 @@
+@using NigerianPrimarySchool.Application.DTOs.Auth
+@inject IIdentityService    IdentityService
+@inject DialogService       DialogService
+@inject NotificationService NotificationService
+
+@if (dto is null)
+{
+    <RadzenProgressBarCircular Visible="true" />
+}
+else
+{
+    <EditForm Model="dto" OnValidSubmit="Submit" FormName="edit-user">
+        <DataAnnotationsValidator />
+        <RadzenRow Gap="1rem">
+            <RadzenColumn SizeMD="6">
+                <RadzenFormField Text="First Name">
+                    <InputText @bind-Value="dto.FirstName" class="rz-textbox" />
+                    <ValidationMessage For="() => dto.FirstName" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn SizeMD="6">
+                <RadzenFormField Text="Last Name">
+                    <InputText @bind-Value="dto.LastName" class="rz-textbox" />
+                    <ValidationMessage For="() => dto.LastName" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn SizeMD="6">
+                <RadzenFormField Text="Middle Name">
+                    <InputText @bind-Value="dto.MiddleName" class="rz-textbox" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn SizeMD="6">
+                <RadzenFormField Text="Phone Number">
+                    <InputText @bind-Value="dto.PhoneNumber" class="rz-textbox" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn SizeMD="6">
+                <RadzenFormField Text="Gender">
+                    <RadzenDropDown @bind-Value="dto.Gender"
+                                    Data="@(new[]{"Male","Female","Other"})"
+                                    class="rz-textbox" AllowClear="true" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn SizeMD="6">
+                <RadzenFormField Text="Date of Birth">
+                    <RadzenDatePicker @bind-Value="dto.DateOfBirth" DateFormat="dd/MM/yyyy" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn SizeMD="12">
+                <RadzenFormField Text="Role">
+                    <RadzenDropDown @bind-Value="selectedRole" Data="Roles.All"
+                                    class="rz-textbox" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Danger" style="margin-top:.75rem">@error</RadzenAlert>
+        }
+
+        <div class="nps-dialog-actions">
+            <RadzenButton Text="Cancel" ButtonStyle="ButtonStyle.Light"
+                          Click="@(() => DialogService.Close(false))" />
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Save Changes"
+                          Icon="save" ButtonStyle="ButtonStyle.Primary"
+                          IsBusy="@busy" BusyText="Saving…" />
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public string UserId { get; set; } = string.Empty;
+
+    private UpdateProfileDto? dto;
+    private string?           selectedRole;
+    private string?           error;
+    private bool              busy;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var profile = await IdentityService.GetUserByIdAsync(UserId);
+        if (profile is null) { error = "User not found."; return; }
+
+        selectedRole = profile.PrimaryRole == "—" ? null : profile.PrimaryRole;
+        dto = new UpdateProfileDto
+        {
+            FirstName   = profile.FirstName,
+            MiddleName  = profile.MiddleName,
+            LastName    = profile.LastName,
+            PhoneNumber = profile.PhoneNumber,
+            Gender      = profile.Gender,
+            DateOfBirth = profile.DateOfBirth,
+            Address     = profile.Address,
+        };
+    }
+
+    private async Task Submit()
+    {
+        if (dto is null) return;
+        busy = true; error = null;
+
+        // Update profile fields
+        var updateResult = await IdentityService.UpdateProfileAsync(UserId, dto);
+        if (!updateResult.Succeeded) { error = updateResult.FirstError; busy = false; return; }
+
+        // Sync role if changed
+        if (selectedRole is not null)
+        {
+            var currentRoles = await IdentityService.GetUserRolesAsync(UserId);
+            if (!currentRoles.Contains(selectedRole))
+            {
+                foreach (var r in currentRoles)
+                    await IdentityService.RemoveRoleAsync(UserId, r);
+                await IdentityService.AssignRoleAsync(UserId, selectedRole);
+            }
+        }
+
+        NotificationService.Notify(NotificationSeverity.Success,
+            "Updated", "User profile saved successfully.");
+        DialogService.Close(true);
+    }
+}

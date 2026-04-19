@@ -1,0 +1,138 @@
+@page "/admin/users"
+@attribute [Authorize(Policy = Policies.RequireSuperAdmin)]
+@using NigerianPrimarySchool.Application.DTOs.Auth
+@inject IIdentityService    IdentityService
+@inject NotificationService NotificationService
+@inject DialogService       DialogService
+
+<PageTitle>User Management — NPS Admin</PageTitle>
+
+<RadzenText TextStyle="TextStyle.H4" class="nps-page-title">
+    <RadzenIcon Icon="group" /> User Management
+</RadzenText>
+
+<!-- Toolbar -->
+<RadzenRow Gap="0.75rem" AlignItems="AlignItems.Center" style="margin-bottom:1rem">
+    <RadzenColumn>
+        <RadzenDropDown @bind-Value="roleFilter" Data="allRoles" Placeholder="All Roles"
+                        AllowClear="true" Change="OnRoleFilterChange"
+                        Style="min-width:200px" />
+    </RadzenColumn>
+    <RadzenColumn>
+        <RadzenButton Text="Add User" Icon="person_add" ButtonStyle="ButtonStyle.Primary"
+                      Click="OpenAddDialog" />
+    </RadzenColumn>
+</RadzenRow>
+
+<!-- Grid -->
+<RadzenDataGrid Data="@displayedUsers" TItem="UserListItemDto"
+                AllowPaging="true" PageSize="15"
+                AllowSorting="true" AllowFiltering="true"
+                FilterMode="FilterMode.Simple" class="nps-grid">
+    <Columns>
+        <RadzenDataGridColumn TItem="UserListItemDto" Property="FullName"
+                              Title="Full Name" Width="200px" />
+        <RadzenDataGridColumn TItem="UserListItemDto" Property="Email"
+                              Title="Email" Width="230px" />
+        <RadzenDataGridColumn TItem="UserListItemDto" Property="PhoneNumber"
+                              Title="Phone" Width="140px" />
+        <RadzenDataGridColumn TItem="UserListItemDto" Property="PrimaryRole"
+                              Title="Role" Width="180px">
+            <Template Context="row">
+                <RadzenBadge Text="@row.PrimaryRole" BadgeStyle="BadgeStyle.Info" />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="UserListItemDto" Property="IsActive"
+                              Title="Status" Width="100px" Filterable="false">
+            <Template Context="row">
+                <RadzenBadge Text="@(row.IsActive ? "Active" : "Inactive")"
+                             BadgeStyle="@(row.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)" />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="UserListItemDto" Property="CreatedAt"
+                              Title="Joined" Width="120px" FormatString="{0:dd/MM/yyyy}" />
+        <RadzenDataGridColumn TItem="UserListItemDto" Property="LastLoginAt"
+                              Title="Last Login" Width="120px" FormatString="{0:dd/MM/yyyy}" />
+        <RadzenDataGridColumn TItem="UserListItemDto" Title="Actions"
+                              Width="130px" Sortable="false" Filterable="false">
+            <Template Context="row">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small"
+                              Click="@(() => OpenEditDialog(row.Id))" title="Edit user" />
+                @if (row.IsActive)
+                {
+                    <RadzenButton Icon="block" ButtonStyle="ButtonStyle.Warning"
+                                  Size="ButtonSize.Small"
+                                  Click="@(() => ToggleActive(row, false))" title="Deactivate" />
+                }
+                else
+                {
+                    <RadzenButton Icon="check_circle" ButtonStyle="ButtonStyle.Success"
+                                  Size="ButtonSize.Small"
+                                  Click="@(() => ToggleActive(row, true))" title="Activate" />
+                }
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    private IReadOnlyList<UserListItemDto> allUsers      = [];
+    private IReadOnlyList<UserListItemDto> displayedUsers = [];
+    private string?  roleFilter;
+    private string[] allRoles = [.. Roles.All];
+
+    protected override async Task OnInitializedAsync() => await LoadUsers();
+
+    private async Task LoadUsers()
+    {
+        allUsers = await IdentityService.GetAllUsersAsync();
+        ApplyFilter();
+    }
+
+    private async Task OnRoleFilterChange()
+    {
+        if (!string.IsNullOrEmpty(roleFilter))
+            displayedUsers = await IdentityService.GetUsersByRoleAsync(roleFilter);
+        else
+            ApplyFilter();
+    }
+
+    private void ApplyFilter() => displayedUsers = allUsers;
+
+    private async Task OpenAddDialog()
+    {
+        var ok = await DialogService.OpenAsync<AddUserDialog>("Add New User",
+            [], new DialogOptions { Width = "540px", CloseDialogOnOverlayClick = false });
+        if (ok is true) await LoadUsers();
+    }
+
+    private async Task OpenEditDialog(string userId)
+    {
+        var ok = await DialogService.OpenAsync<EditUserDialog>("Edit User",
+            new Dictionary<string, object> { ["UserId"] = userId },
+            new DialogOptions { Width = "540px", CloseDialogOnOverlayClick = false });
+        if (ok is true) await LoadUsers();
+    }
+
+    private async Task ToggleActive(UserListItemDto user, bool activate)
+    {
+        var confirmed = await DialogService.Confirm(
+            $"{(activate ? "Activate" : "Deactivate")} {user.FullName}?",
+            activate ? "Activate User" : "Deactivate User",
+            new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" });
+        if (confirmed != true) return;
+
+        var result = activate
+            ? await IdentityService.ReactivateUserAsync(user.Id)
+            : await IdentityService.DeactivateUserAsync(user.Id);
+
+        NotificationService.Notify(
+            result.Succeeded ? NotificationSeverity.Success : NotificationSeverity.Error,
+            result.Succeeded ? "Done" : "Error",
+            result.Succeeded
+                ? $"User {(activate ? "activated" : "deactivated")} successfully."
+                : result.FirstError);
+
+        if (result.Succeeded) await LoadUsers();
+    }
+}
